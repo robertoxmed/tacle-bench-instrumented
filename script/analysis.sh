@@ -11,7 +11,7 @@ j=0
 while read i
 do
 	tacle_prog[$j]=$i
-	j=$(( $j + 1))
+	j=$(( $j + 1 ))
 done <script/tacleNames.txt
 
 j=0
@@ -41,7 +41,7 @@ do
 
 	# Set the frequency for testing
 	cpupower --cpu all frequency-set -d $f -u $f
-	for t in {0..18}
+	for t in {0..22}
 	do
 		prog=${tacle_prog[$t]}
 		# Test if the result files exist
