@@ -1,6 +1,12 @@
 #!/bin/bash
 
-perf_events='cpu-clock,cpu-cycles,bus-cycles,LLC-misses'
+perf_events='cpu-clock,cpu-cycles,instructions,LLC-misses'
+
+# On intel architectures turn off turboboost and hyperthreading
+echo 1 > /sys/devices/system/cpu/intel_pstate/no_turbo
+echo 0 > /sys/devices/system/cpu/cpufreq/boost
+chcpu -d 7
+
 
 # Turning off RT throttling
 echo -1 >/proc/sys/kernel/sched_rt_runtime_us
@@ -31,8 +37,8 @@ do
 		mkdir results_$f/cpucycles
 	fi
 
-	if [ ! -d "results_$f/buscycles" ]; then
-		mkdir results_$f/buscycles
+	if [ ! -d "results_$f/instructions" ]; then
+		mkdir results_$f/instructions
 	fi
 
 	if [ ! -d "results_$f/l3miss" ]; then
@@ -53,19 +59,19 @@ do
 			touch results_$f/cpucycles/$prog.csv
 		fi
 
-		if test ! -f results_$f/buscycles/$prog.csv; then
-			touch results_$f/buscycles/$prog.csv
+		if test ! -f results_$f/instructions/$prog.csv; then
+			touch results_$f/instructions/$prog.csv
 		fi
 
 		if test ! -f results_$f/l3miss/$prog.csv; then
 			touch results_$f/l3miss/$prog.csv
 		fi
 
-		for i in {1..300}
+		for i in {1..500}
 		do
-			perf stat -C 3 -e $perf_events ./prof/wrapper bench/sequential/$prog/a.out 2>&1 >/dev/null | grep -e 'clock' -e 'cpu-cycles' -e 'bus-cycles' -e 'LLC-misses' | awk '{print $1}' |\
+			perf stat -C 3 -e $perf_events ./prof/wrapper bench/sequential/$prog/a.out 2>&1 >/dev/null | grep -e 'clock' -e 'cpu-cycles' -e 'instructions' -e 'LLC-misses' | awk '{print $1}' |\
 			tee >(awk 'NR % 4 == 0' >>results_$f/l3miss/$prog.csv) >(awk 'NR % 4 == 1' >>results_$f/wcet/$prog.csv) >(awk 'NR % 4 == 2' >> results_$f/cpucycles/$prog.csv)\
-			>(awk 'NR % 4 == 3' >> results_$f/buscycles/$prog.csv)
+			>(awk 'NR % 4 == 3' >> results_$f/instructions/$prog.csv)
 		done
 	done
 done
