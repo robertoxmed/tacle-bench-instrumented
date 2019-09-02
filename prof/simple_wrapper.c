@@ -5,10 +5,13 @@
 #include <unistd.h>
 #include <string.h>
 
+#define L2_CACHE_SIZE (512*1024)
+
 int main (int argc, char **argv)
 {
 	cpu_set_t mask;
 	struct sched_param sparam;
+	char * big_array;
 
 	if (argc != 2) {
 		fprintf(stderr, "Usage %s <test path>\n", argv[0]);
@@ -30,6 +33,13 @@ int main (int argc, char **argv)
 		perror("Set scheduler error, ");
 		exit(2);
 	}
+	
+	/* Kill L2 cache */
+	big_array = (char*) malloc(L2_CACHE_SIZE);
+	if (big_array == NULL)
+		perror("Malloc failed");
+	memset(big_array, 1, L2_CACHE_SIZE);
+	free(big_array);
 
 	/* Swap to the wanted program */
 	if (execl(argv[1], NULL) == -1) {

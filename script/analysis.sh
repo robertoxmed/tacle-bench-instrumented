@@ -3,7 +3,7 @@
 perf_events='cpu-clock,cpu-cycles,instructions,LLC-misses'
 
 # On intel architectures turn off turboboost and hyperthreading
-echo 1 > /sys/devices/system/cpu/intel_pstate/no_turbo
+#echo 1 > /sys/devices/system/cpu/intel_pstate/no_turbo
 echo 0 > /sys/devices/system/cpu/cpufreq/boost
 chcpu -d 7
 
